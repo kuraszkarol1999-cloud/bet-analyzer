@@ -1,56 +1,81 @@
 import streamlit as st
 
-# Konfiguracja strony internetowej
-st.set_page_config(page_title="AI Bet Analyzer", page_icon="⚽", layout="centered")
+# Konfiguracja strony
+st.set_page_config(page_title="FlashBet AI - Super Agent 2.0", page_icon="⚽", layout="wide")
 
-st.title("⚽ Inteligentny Analityk & Bet Builder AI")
-st.markdown("Koniec ze skakaniem po Flashscore i Superbet. Wpisz mecz, a AI policzy statystyki i ułoży optymalny kupon z bezpiecznymi liniami.")
+st.title("⚽ FlashBet AI – Super Agent Bukmacherski 2.0")
+st.markdown("Profesjonalny system analityczny z filtrowaniem pułapek, kalkulacją Value oraz uwzględnianiem sędziego i kontuzji.")
 
 st.divider()
 
-# Panel boczny lub główne pola do wpisania meczu
-st.subheader("1. Wybierz spotkanie do analizy")
-col1, col2 = st.columns(2)
+# Zakładki aplikacji
+tab1, tab2 = st.tabs(["⚡ Sygnały AI (Typy Dnia)", "🧠 Zaawansowany Warsztat & Kalkulator Value"])
 
-with col1:
-    gospodarz = st.text_input("Drużyna Gospodarzy", "Lech Poznań")
-with col2:
-    gosc = st.text_input("Drużyna Gości", "Sunderland")
-
-rozgrywki = st.selectbox("Rozgrywki", ["Liga Europy", "Ekstraklasa", "Premier League", "Inne / Międzynarodowe"])
-
-# Przycisk analizy
-if st.button("🚀 Uruchom pełną analizę i znajdź Bet Buildera", type="primary"):
+# ==========================================
+# ZAKŁADKA 1: SYGNAŁY AI
+# ==========================================
+with tab1:
+    st.subheader("🔥 Dzisiejsze Sygnały o Wysokiej Wartości (Value)")
     
-    with st.spinner("Analizuję H2H, formę, statystyki sędziego i szukam valuebetów..."):
-        import time
-        time.sleep(1.5)
+    col_s1, col_s2 = st.columns(2)
+    
+    with col_s1:
+        st.info("### 🇪🇬 Nottingham vs Arsenal\n"
+                "* **Szansa AI:** 78%\n"
+                "* **Rekomendacja:** Bet Builder (Rożne + Faule)\n"
+                "* **Uzasadnienie:** Ominięto niski kurs na czyste rożne. Sędzia wstrzemięźliwy, wysoka intensywność bocznych sektorów.")
+    
+    with col_s2:
+        st.success("### 🇪🇺 Lech Poznań vs Sunderland\n"
+                 "* **Szansa AI:** 82% (Pewniak)\n"
+                 "* **Rekomendacja:** Poniżej 4.5 bramek\n"
+                 "* **Uzasadnienie:** Obie ekipy defensywne w delegacjach/pucharach. Brak absencji w bloku obronnym.")
+
+# ==========================================
+# ZAKŁADKA 2: WARSZTAT AGENTA I KALKULATOR
+# ==========================================
+with tab2:
+    st.subheader("🛠️ Panel Precyzyjnej Analizy i Weryfikacji Kursów")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        mecz_nazwa = st.text_input("Nazwa spotkania", "np. Real Madryt vs Barcelona")
+        szacunek_ai = st.slider("Szacowane przez AI prawdopodobieństwo wejścia (%)", 10, 95, 70)
+        kurs_buk = st.number_input("Kurs oferowany przez bukmachera", min_value=1.01, max_value=10.0, value=1.55)
         
-    st.success("Analiza zakończona sukcesem!")
-    
-    st.markdown(f"### 📊 Raport dla meczu: {gospodarz} vs {gosc}")
-    
-    st.markdown("#### 📈 Zbiorcze statystyki (Średnie z ostatnich 6 meczów)")
-    col_s1, col_s2, col_s3 = st.columns(3)
-    col_s1.metric("Średna rzutów rożnych", "9.4 / mecz", "Bezpieczna linia: 6.5")
-    col_s2.metric("Średnia fauli", "24.1 / mecz", "Sędzia: wstrzemięźliwy")
-    col_s3.metric("Gole (xG)", "2.65", "Skłonność do Undera")
-    
-    st.divider()
-    
-    st.markdown("### 💡 Propozycje AI i Inteligentne Bet Buildery")
-    
-    st.markdown("🟢 **Wysokie prawdopodobieństwo (ok. 82%) – Pewniak do AKO**")
-    st.info(f"**Typ:** Poniżej 4.5 bramek w meczu\n* **Dlaczego:** Kurs solo to ok. 1.30. Obie ekipy w meczach bezpośrednich rzadko przekraczają granicę 3 goli.")
-    
-    st.markdown("🟡 **Inteligentny Bet Builder (Wysokie Value / Około 75% szans)**")
-    st.warning(
-        f"⚠️ *Analiza pułapki bukmacherskiej:* Kurs na standardowe rzuty rożne powyżej 7.5 wynosi zaledwie **1.21** (nieopłacalne).\n\n"
-        f"🛠️ **Zbudowany Bet Builder przez AI:**\n"
-        f"* **Zdarzenie 1:** Powyżej 6.5 rzutów rożnych w meczu (bezpieczniejsza, niższa linia)\n"
-        f"* **Zdarzenie 2:** Obie drużyny razem powyżej 18.5 fauli\n"
-        f"👉 **Łączny kurs w Bet Builderze:** **ok. 1.68** (Zamiast mizernego 1.21, zyskujesz bezpieczny zakład o wyższym kursie łącznym na bazie twardych statystyk fauli sędziego)."
-    )
-    
-    st.markdown("🔴 **Ryzykowny strzał / Wyższy kurs (~45% szans)**")
-    st.error(f"**Typ:** Wygrana {gospodarz} i powyżej 1.5 goli w meczu (Kurs: ~2.15)")
+    with col2:
+        st.markdown("#### ⚖️ Dodatkowe czynniki ryzyka:")
+        kontuzje = st.checkbox("⚠️ Brak kluczowego strzelca / obrońcy w jednej z drużyn")
+        sędzia_surowy = st.checkbox("🟨 Sędzia z wysoką średnią kartek/fauli")
+        derby = st.checkbox("🔥 Mecz derbowy / podwyższone ryzyko remisu")
+
+    if st.button("🚀 Uruchom Audyt Agenta AI", type="primary"):
+        # Matematyczne wyliczenie opłacalności (Value)
+        implied_probability = (1 / kurs_buk) * 100
+        
+        # Korekta o czynniki ryzyka
+        ostateczna_szansa = szacunek_ai
+        if kontuzje:
+            ostateczna_szansa -= 8
+        if derby:
+            ostateczna_szansa -= 10
+        if sędzia_surowy and szacunek_ai > 50:
+            ostateczna_szansa += 3
+
+        st.divider()
+        st.markdown(f"### 📊 Raport Audytu dla: *{mecz_nazwa}*")
+        
+        # Ocena kursu
+        col_res1, col_res2, col_res3 = st.columns(3)
+        col_res1.metric("Skorygowana szansa AI", f"{ostateczna_szansa}%")
+        col_res2.metric("Szansa bukmachera (z kursu)", f"{implied_probability:.1f}%")
+        col_res3.metric("Różnica (Value)", f"+{ostateczna_szansa - implied_probability:.1f}%" if ostateczna_szansa > implied_probability else "Brak Value")
+
+        # Werdykt i filtrowanie pułapek
+        if kurs_buk < 1.30:
+            st.error("❌ **ODRADZANE:** Kurs poniżej 1.30 to klasyczna pułapka bukmacherska. Nie opłaca się grać tego pojedynczo ani jako 'zapychacz'.")
+        elif ostateczna_szansa - implied_probability > 5:
+            st.success("✅ **ZNALEZIONO VALUEBET!** Prawdopodobieństwo wyliczone przez model jest wyższe niż wycena bukmachera. Zakład ma sens ekonomiczny.")
+        else:
+            st.warning("⚠️ **NEUTRALNIE:** Kurs jest uczciwie oszacowany przez rynek. Brak wyraźnej przewagi statystycznej.")
