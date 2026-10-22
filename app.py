@@ -1,103 +1,93 @@
 import streamlit as st
-import requests
-from datetime import date
 
-# Konfiguracja interfejsu
-st.set_page_config(page_title="FlashBet AI - Kreator Kuponów", page_icon="⚽", layout="wide")
-st.title("⚽ FlashBet AI – Inteligentny Konstruktor Bet Builderów")
-st.markdown("Wybierz mecz, a automat pobierze H2H i zbuduje bezpieczną sklejkę omijającą ryzykowne linie bukmachera.")
+# Konfiguracja - wymuszamy ciemny motyw i szeroki układ
+st.set_page_config(page_title="FlashBet AI - Dashboard", layout="wide", initial_sidebar_state="expanded")
 
-# 1. Autoryzacja API
-try:
-    API_KEY = st.secrets["API_KEY"]
-except KeyError:
-    st.error("⚠️ Brak klucza API w ustawieniach Streamlit.")
-    st.stop()
+# ==========================================
+# PANEL BOCZNY (SIDEBAR)
+# ==========================================
+st.sidebar.title("⚡ FlashBet AI")
+st.sidebar.markdown("---")
 
-HEADERS = {'x-apisports-key': API_KEY}
+st.sidebar.caption("STATYSTYCZNE")
+menu = st.sidebar.radio("Nawigacja", [
+    "📈 Value Bets", 
+    "🚩 Rożne", 
+    "⚽ Gole", 
+    "🟨 Kartki", 
+    "⚖️ Sędziowie",
+    "🤖 Generator AKO"
+])
 
-# 2. Funkcje pobierające dane (z pamięcią podręczną na 1h, aby oszczędzać limit API)
-@st.cache_data(ttl=3600)
-def pobierz_dzisiejsze_mecze(dzisiaj):
-    url = "https://v3.football.api-sports.io/fixtures"
-    req = requests.get(url, headers=HEADERS, params={"date": dzisiaj})
-    return req.json()
+# ==========================================
+# GŁÓWNA STRONA - ZAKŁADKA VALUE BETS
+# ==========================================
+if menu == "📈 Value Bets":
+    # Nagłówek
+    col_title, col_btn = st.columns([4, 1])
+    with col_title:
+        st.header("Value Bets 🚀 +EV")
+        st.markdown("Kursy wyższe, niż wynika z historii drużyn. Automatyczne typy oparte na twardych danych.")
+    with col_btn:
+        st.button("Oblokuj pełny dostęp", type="primary")
 
-@st.cache_data(ttl=3600)
-def pobierz_h2h(id_druzyny_1, id_druzyny_2):
-    url = "https://v3.football.api-sports.io/fixtures/headtohead"
-    # Pobieramy historię H2H i zawężamy do 5 ostatnich spotkań
-    req = requests.get(url, headers=HEADERS, params={"h2h": f"{id_druzyny_1}-{id_druzyny_2}", "last": "5"})
-    return req.json()
-
-# 3. Uruchomienie bazy meczów
-dzisiaj = str(date.today())
-dane_mecze = pobierz_dzisiejsze_mecze(dzisiaj)
-
-if "response" in dane_mecze and len(dane_mecze["response"]) > 0:
-    mecze = dane_mecze["response"]
+    # Filtry
+    st.markdown("---")
+    col_f1, col_f2, col_f3, col_f4 = st.columns([1, 1, 1, 4])
+    col_f1.button("Wczoraj")
+    col_f2.button("Dziś", type="primary")
+    col_f3.button("Jutro")
+    col_f4.text_input("🔍 Szukaj drużyny lub ligi...")
     
-    # Przygotowanie słownika do rozwijanej listy
-    opcje_meczow = {}
-    for m in mecze[:50]: # Ograniczamy do 50, żeby lista była czytelna
-        gospodarz = m["teams"]["home"]["name"]
-        gosc = m["teams"]["away"]["name"]
-        id_h = m["teams"]["home"]["id"]
-        id_a = m["teams"]["away"]["id"]
-        liga = m["league"]["name"]
-        nazwa_wyswietlana = f"{gospodarz} vs {gosc} 🏆 ({liga})"
-        opcje_meczow[nazwa_wyswietlana] = (id_h, id_a, gospodarz, gosc)
+    st.subheader("Darmowe typy na dziś")
+    st.caption("Trzy najwyższe odchylenia przy kursach 1.50–1.90, cały mecz")
 
-    # 4. Interfejs wyboru meczu
-    st.divider()
-    st.subheader("🎯 1. Wybierz spotkanie do analizy")
-    wybrany_mecz = st.selectbox("Dzisiejsze spotkania:", list(opcje_meczow.keys()))
-    
-    if st.button("🚀 Uruchom Agenta i Zbuduj Kupon", type="primary"):
-        id_h, id_a, gospodarz, gosc = opcje_meczow[wybrany_mecz]
-        
-        with st.spinner("Pobieranie twardych danych H2H i obliczanie średnich..."):
-            h2h_dane = pobierz_h2h(id_h, id_a)
+    # Kafelki z meczami (wzorowane na PredictStats)
+    c1, c2, c3 = st.columns(3)
+
+    # KAFELEK 1
+    with c1:
+        with st.container(border=True):
+            st.caption("🏆 UEFA Europa League • 18:45")
+            st.markdown("### Trabzonspor\n### Heart of Midlothian")
+            st.success("🟢 Poniżej 3.5 Bramki")
             
-        if "response" in h2h_dane and len(h2h_dane["response"]) > 0:
-            historia = h2h_dane["response"]
+            # Statystyki z dużą czcionką
+            st.metric(label="Odchylenie wartości", value="+28,0%", delta="Kurs: 1.73", delta_color="off")
             
-            # Prosta matematyka wyciągająca średnią goli z H2H
-            gole_suma = 0
-            for h_mecz in historia:
-                gole_suma += h_mecz["goals"]["home"] if h_mecz["goals"]["home"] is not None else 0
-                gole_suma += h_mecz["goals"]["away"] if h_mecz["goals"]["away"] is not None else 0
-                
-            srednia_goli = gole_suma / len(historia)
+            # Paski postępu dla wizualizacji
+            st.progress(74, text="74% historycznie (model AI)")
+            st.progress(58, text="58% szansa bukmachera (z kursu)")
             
-            st.divider()
-            st.subheader(f"📊 Raport Agenta: {gospodarz} vs {gosc}")
+            st.button("Pełna Analiza ➔", key="btn1", use_container_width=True)
+
+    # KAFELEK 2
+    with c2:
+        with st.container(border=True):
+            st.caption("🏆 UEFA Europa League • 21:00")
+            st.markdown("### Omonia Nicosia\n### Benfica")
+            st.error("🔴 Ponad 3.5 Kartki")
             
-            col1, col2 = st.columns([2, 1])
+            st.metric(label="Odchylenie wartości", value="+27,3%", delta="Kurs: 1.83", delta_color="off")
             
-            with col1:
-                st.markdown("### 🧠 Zbudowany Bet Builder (Strategia Niskiego Ryzyka)")
-                st.success(
-                    f"**KROK 1: Redukcja linii rzutów rożnych**\n\n"
-                    f"Automat odrzuca ryzykowną linię 'Powyżej 8.5'. Proponuje bezpieczne **Powyżej 6.5 rzutów rożnych** (szac. kurs ~1.25).\n\n"
-                    f"---\n\n"
-                    f"**KROK 2: Dokładka bramkowa oparta na H2H**\n\n"
-                    f"Średnia bramek w bezpośrednich starciach wynosi **{srednia_goli:.1f}**. Automat dobiera bezpieczne **Powyżej 1.5 gola w meczu** (szac. kurs ~1.18).\n\n"
-                    f"---\n\n"
-                    f"👉 **Proponowany kurs łączny Bet Buildera: ~1.47**\n\n"
-                    f"*(Zamiast szukać szczęścia w wysokich liniach rożnych po kursie 1.50, kleimy dwa wysoce prawdopodobne zdarzenia na twardych liczbach).* "
-                )
+            st.progress(70, text="70% historycznie (model AI)")
+            st.progress(55, text="55% szansa bukmachera (z kursu)")
             
-            with col2:
-                st.markdown("### ⚔️ Ostatnie mecze H2H")
-                for h_mecz in historia:
-                    data_m = h_mecz["fixture"]["date"][:10]
-                    gh = h_mecz["goals"]["home"]
-                    ga = h_mecz["goals"]["away"]
-                    st.caption(f"{data_m}")
-                    st.markdown(f"**{h_mecz['teams']['home']['name']} {gh} : {ga} {h_mecz['teams']['away']['name']}**")
-                    st.divider()
-        else:
-            st.warning("Brak historii bezpośrednich spotkań (H2H) dla tych drużyn w bazie danych.")
+            st.button("Pełna Analiza ➔", key="btn2", use_container_width=True)
+
+    # KAFELEK 3
+    with c3:
+        with st.container(border=True):
+            st.caption("🏆 Copa Venezuela • 21:00")
+            st.markdown("### Metropolitanos FC\n### Anzoategui FC")
+            st.warning("🟠 Poniżej 10.5 Rzuty rożne")
+            
+            st.metric(label="Odchylenie wartości", value="+26,2%", delta="Kurs: 1.73", delta_color="off")
+            
+            st.progress(73, text="73% historycznie (model AI)")
+            st.progress(58, text="58% szansa bukmachera (z kursu)")
+            
+            st.button("Pełna Analiza ➔", key="btn3", use_container_width=True)
+
 else:
-    st.warning("Brak meczów na dziś lub wyczerpano limit API.")
+    st.info(f"Zakładka {menu} jest w budowie. Tutaj pojawią się dedykowane filtry.")
